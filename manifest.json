@@ -2,6 +2,10 @@
   "manifest_version": 2,
   "name": "Reddit Scrape Chrome Extension",
   "version": "0.1",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Reddit Scrape Chrome Extension"
+  },
   "content_scripts": [
     {
       "matches": [
