@@ -20,8 +20,8 @@
         "https://*/*"
       ],
       "js":[
-        "scripts/content.js",
-        "scripts/inject-iframe.js"
+        "scripts/inject-iframe.js",
+        "scripts/content.js"
       ],
       "css":[
         "css/inject-iframe.css"
