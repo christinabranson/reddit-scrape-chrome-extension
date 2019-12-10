@@ -92,7 +92,18 @@ function setAction(action) {
 
     var element = document.getElementById("current_action");
     element.innerHTML = action;
+
+    // now send this to the background
+    console.log("Now sending to the background.....");
+    chrome.runtime.sendMessage({Message: "update-iframe-chosen-action", Action: action}, function (response) {
+        ;
+    })
 }
+
+chrome.runtime.onMessage.addListener (function (request, sender, sendResponse) {
+    console.log("From background.js: ");
+    console.log(request);
+});
 
 function getSelectedText() {
     var txt = "";

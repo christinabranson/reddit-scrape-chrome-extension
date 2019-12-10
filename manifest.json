@@ -8,6 +8,10 @@
     "http://*/*",
     "https://*/*"
   ],
+  "background": {
+    "scripts": ["scripts/background.js"],
+    "persistent": true
+  },
   "content_scripts":[
     {
       "run_at":"document_start",
