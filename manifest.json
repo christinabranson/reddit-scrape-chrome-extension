@@ -5,8 +5,9 @@
   "permissions":[
     "tabs",
     "webRequest",
-    "http://*/*",
-    "https://*/*"
+    "http://devserver1.codersdev.com:8081/*"
+    //"http://*/*",
+    //"https://*/*"
   ],
   "background": {
     "scripts": ["scripts/background.js"],

@@ -1,39 +1,14 @@
-window.addEventListener("mouseup", function(evt) {
-    //alert("mouseup");
-    var targ = evt.target;
-
-    // Set the page URL if not set
-    if (content["page_link"].length == 0) {
-        content["page_link"] = window.location.href;
-        updateFrontEndDisplay("page_link");
-    }
-
-    if (current_action.length > 0) {
-        if (current_action == "title" || current_action == "author") {
-            // get the selected text
-            var selectedText = getSelectedText();
-            content[current_action] = selectedText;
-        } else if (current_action == "content") {
-            var selectedText = getHTMLOfSelection();
-            content[current_action] = selectedText;
-        } else if (current_action == "link") {
-            // get link from highlight
-            var selectedText = getLinkFromSelection();
-            content[current_action] = selectedText;
-        }
-
-        updateFrontEndDisplay(current_action);
-    }
-});
-
-var content = {};
-content["page_link"] = "";
-content["title"] = "";
-content["content"] = "";
-content["content"] = "";
-content["link"] = "";
+var current_action = "";
+var contentFields = [
+    "page_link",
+    //"title",
+    "author",
+    "content",
+    "link",
+];
 
 // handle set title binding
+/*
 var setTitleElement = document.getElementById("settitle");
 setTitleElement.addEventListener(
     "click",
@@ -42,6 +17,7 @@ setTitleElement.addEventListener(
     },
     false
 );
+*/
 // handle set author binding
 var setAuthorElement = document.getElementById("setauthor");
 setAuthorElement.addEventListener(
@@ -70,18 +46,40 @@ setContentElement.addEventListener(
     false
 );
 
-var current_action = "link";
-var selected_text = "";
+var sendToServerElement = document.getElementById("sendserver");
+sendToServerElement.addEventListener(
+    "click",
+    function(e) {
+        // now send this to the background
+        console.log("Now sending to the background.....");
+        chrome.runtime.sendMessage({Message: "iframe-send-server"}, function (response) {
+            ;
+        })
+    },
+    false
+);
 
-function updateFrontEndDisplay(variable) {
-    console.log("updateFrontEndDisplay: " + variable);
-    if (content[variable] === undefined) {
-        return;
-    }
+var clearContentsElement = document.getElementById("clearcontent");
+clearContentsElement.addEventListener(
+    "click",
+    function(e) {
+        // now send this to the background
+        console.log("Now sending to the background.....");
+        chrome.runtime.sendMessage({Message: "iframe-clear-content"}, function (response) {
+            ;
+        })
+    },
+    false
+);
 
-    var element = document.getElementById(variable);
-    if (element !== undefined) {
-        element.value = content[variable];
+function updateFrontEndForms(content) {
+
+    for (var contentFieldsI = 0; contentFieldsI < contentFields.length; contentFieldsI++) {
+        var attribute = contentFields[contentFieldsI];
+        var element = document.getElementById(attribute);
+        if (element !== undefined) {
+            element.value = content[attribute];
+        }
     }
 }
 
@@ -93,6 +91,11 @@ function setAction(action) {
     var element = document.getElementById("current_action");
     element.innerHTML = action;
 
+    //
+    ensureAlertGreen();
+    var element = document.getElementById("active");
+    element.innerHTML = "";
+
     // now send this to the background
     console.log("Now sending to the background.....");
     chrome.runtime.sendMessage({Message: "update-iframe-chosen-action", Action: action}, function (response) {
@@ -100,75 +103,41 @@ function setAction(action) {
     })
 }
 
+function ensureAlertGreen() {
+    var alert = document.getElementById("alert");
+    alert.classList.remove("alert-danger");
+    alert.classList.add("alert-primary");
+
+    var element = document.getElementById("active");
+    element.innerHTML = "";
+}
+
+function ensureAlertRed() {
+    var alert = document.getElementById("alert");
+    alert.classList.remove("alert-primary");
+    alert.classList.add("alert-danger");
+
+    var element = document.getElementById("active");
+    element.innerHTML = "Select an attribute to start listening!<br/>";
+}
+
+function updateLatestSelection(latestSelection) {
+    var element = document.getElementById("last_selection");
+    element.innerHTML = latestSelection;
+}
+
 chrome.runtime.onMessage.addListener (function (request, sender, sendResponse) {
-    console.log("From background.js: ");
+    console.log("iframejs: From background.js: ");
     console.log(request);
+
+    if (request.Message == 'background-content-update') {
+        var content = request.Content;
+        var latestSelection = request.Latest;
+        console.log(content);
+
+        updateFrontEndForms(content);
+        updateLatestSelection(latestSelection);
+    }
 });
 
-function getSelectedText() {
-    var txt = "";
-    if (window.getSelection) {
-        txt = window.getSelection().toString();
-    } else if (document.getSelection) {
-        txt = document.getSelection();
-    } else if (document.selection) {
-        txt = document.selection.createRange().text;
-    }
-    return txt;
-}
 
-function getHTMLOfSelection() {
-    var range;
-    if (document.selection && document.selection.createRange) {
-        range = document.selection.createRange();
-        return range.htmlText;
-    } else if (window.getSelection) {
-        var selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            range = selection.getRangeAt(0);
-            var clonedSelection = range.cloneContents();
-            var div = document.createElement("div");
-            div.appendChild(clonedSelection);
-            return div.innerHTML;
-        }
-    }
-
-    return "";
-}
-
-function getLinkFromSelection() {
-    console.log("getLinkFromSelection");
-    var link = "";
-    if (window.getSelection) {
-        var selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            range = selection.getRangeAt(0);
-            var clonedSelection = range.cloneContents();
-            var parentNode = selection.anchorNode.parentElement;
-            var hasATags = false;
-            var count = 0; // endess loop bad, k?
-            while (count < 5 && !hasATags) {
-                var div = document.createElement("div");
-                var clonedParentNode = parentNode.cloneNode(true);
-                console.log(clonedParentNode);
-                div.appendChild(clonedParentNode);
-                var aElements = div.querySelectorAll("a");
-                if (aElements.length > 0) {
-                    hasATags = true;
-                    var aElement = aElements[0];
-                    var href = aElement.getAttribute("href");
-                    div.removeChild(clonedParentNode);
-                    return href;
-                } else {
-                    console.log("No a tags found at count " + count + ". So moving up a parent...");
-                    div.removeChild(clonedParentNode);
-                    hasATags = false;
-                    parentNode = parentNode.parentElement; // now move on up
-                }
-                count++;
-            }
-        }
-    }
-
-    return link;
-}
