@@ -6,10 +6,18 @@
     "default_popup": "popup.html",
     "default_title": "Reddit Scrape Chrome Extension"
   },
+  "background":
+  {
+    "scripts": ["jquery.js","background.js"],
+    "persistent": true
+  },
+  "permissions": [
+    "tabs","http://localhost/*"
+  ],
   "content_scripts": [
     {
       "matches": [
-        "https://reddit.com/*", "https://www.reddit.com/*"
+        "<all_urls>"
       ],
       "js": ["app.js"]
     }
