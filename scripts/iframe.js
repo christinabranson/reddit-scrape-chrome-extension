@@ -131,6 +131,8 @@ function getLinkFromSelection() {
     if (window.getSelection) {
         var selection = window.getSelection();
         if (selection.rangeCount > 0) {
+            range = selection.getRangeAt(0);
+            var clonedSelection = range.cloneContents();
             var parentNode = selection.anchorNode.parentElement;
             var hasATags = false;
             var count = 0; // endess loop bad, k?
