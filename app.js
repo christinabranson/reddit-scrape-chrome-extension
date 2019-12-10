@@ -33,11 +33,42 @@ content["content"] = "";
 content["content"] = "";
 content["link"] = "";
 
+// handle set title binding
 var setTitleElement = document.getElementById("settitle");
-console.log(setTitleElement);
-setTitleElement.addEventListener("click",function(e){
-    setAction("title");
-},false);
+setTitleElement.addEventListener(
+    "click",
+    function(e) {
+        setAction("title");
+    },
+    false
+);
+// handle set author binding
+var setAuthorElement = document.getElementById("setauthor");
+setAuthorElement.addEventListener(
+    "click",
+    function(e) {
+        setAction("author");
+    },
+    false
+);
+// handle set link binding
+var setLinkElement = document.getElementById("setlink");
+setLinkElement.addEventListener(
+    "click",
+    function(e) {
+        setAction("link");
+    },
+    false
+);
+// handling set content binding
+var setContentElement = document.getElementById("setcontent");
+setContentElement.addEventListener(
+    "click",
+    function(e) {
+        setAction("content");
+    },
+    false
+);
 
 var current_action = "link";
 var selected_text = "";
@@ -96,30 +127,35 @@ function getHTMLOfSelection() {
 
 function getLinkFromSelection() {
     console.log("getLinkFromSelection");
-    var range;
-    if (document.selection && document.selection.createRange) {
-        range = document.selection.createRange();
-        return range.htmlText;
-    } else if (window.getSelection) {
+    var link = "";
+    if (window.getSelection) {
         var selection = window.getSelection();
         if (selection.rangeCount > 0) {
-            range = selection.getRangeAt(0);
-            var clonedSelection = range.cloneContents();
             var parentNode = selection.anchorNode.parentElement;
-            var clonedParentNode = parentNode.cloneNode(true);
-            console.log(parentNode);
-            console.log(clonedParentNode);
-            var div = document.createElement("div");
-            div.appendChild(clonedParentNode);
-            var aElements = div.querySelectorAll("a");
-            if (aElements.length > 0) {
-                var aElement = aElements[0];
-                var href = aElement.getAttribute("href");
-                div.removeChild(clonedParentNode);
-                return href;
+            var hasATags = false;
+            var count = 0; // endess loop bad, k?
+            while (count < 5 && !hasATags) {
+                var div = document.createElement("div");
+                var clonedParentNode = parentNode.cloneNode(true);
+                console.log(clonedParentNode);
+                div.appendChild(clonedParentNode);
+                var aElements = div.querySelectorAll("a");
+                if (aElements.length > 0) {
+                    hasATags = true;
+                    var aElement = aElements[0];
+                    var href = aElement.getAttribute("href");
+                    div.removeChild(clonedParentNode);
+                    return href;
+                } else {
+                    console.log("No a tags found at count " + count + ". So moving up a parent...");
+                    div.removeChild(clonedParentNode);
+                    hasATags = false;
+                    parentNode = parentNode.parentElement; // now move on up
+                }
+                count++;
             }
         }
     }
 
-    return "";
+    return link;
 }
