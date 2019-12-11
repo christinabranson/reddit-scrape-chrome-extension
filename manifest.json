@@ -5,7 +5,8 @@
   "permissions":[
     "tabs",
     "webRequest",
-    "http://devserver1.codersdev.com:8081/*"
+    "http://devserver1.codersdev.com:8081/*",
+    "http://localhost/*"
     //"http://*/*",
     //"https://*/*"
   ],

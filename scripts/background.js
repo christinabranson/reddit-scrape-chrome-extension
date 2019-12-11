@@ -1,5 +1,9 @@
 console.log("At least reached background.js");
 
+// find a better place to put these....
+var api_username = "api_user";
+var api_password= "cPsSEfwfsHBJErv4AM8qhwptBmePkd78pQsKdGNXNWE5qyznHuUhxNEzaZM9VmxGASynkU3dXy8f";
+
 var chosen_action = "";
 
 var contentFields = [
@@ -73,9 +77,36 @@ chrome.runtime.onMessage.addListener (
         }
 
         else if (request.Message == "iframe-send-server") {
-            clearContentFields();
+            console.log("Now sending shit to the server....");
 
-            console.log(content);
+            var dataForServer = {
+                auth: {
+                    user: api_username,
+                    password: api_password
+                },
+                data: content
+            };
+
+            // send the data
+            var xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    alert(xhr.responseText);
+                }
+            }
+
+            var url = "http://localhost/api/postStory";
+            var dataJSON = JSON.stringify(dataForServer);
+            console.log(dataJSON);
+
+            xhr.open('POST', url);
+            xhr.send(dataJSON);
+
+            xhr.onload = function (data) {
+                console.log("xhr");
+                console.log(data);
+            };
 
             // Now send back to the iframe
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
