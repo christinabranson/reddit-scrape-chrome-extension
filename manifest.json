@@ -1,0 +1,37 @@
+{
+  "manifest_version":2,
+  "name":"Scrape Chrome Extension",
+  "version":"0.1",
+  "permissions":[
+    "tabs",
+    "webRequest",
+    "http://devserver1.codersdev.com:8081/*",
+    "http://localhost/*"
+    //"http://*/*",
+    //"https://*/*"
+  ],
+  "background": {
+    "scripts": ["scripts/background.js"],
+    "persistent": true
+  },
+  "content_scripts":[
+    {
+      "run_at":"document_start",
+      "matches":[
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js":[
+        "scripts/inject-iframe.js",
+        "scripts/content.js"
+      ],
+      "css":[
+        "css/inject-iframe.css"
+      ]
+    }
+  ],
+  "web_accessible_resources":[
+    "html/iframe.html",
+    "scripts/iframe.js"
+  ]
+}

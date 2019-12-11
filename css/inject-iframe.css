@@ -1,0 +1,21 @@
+#ssac-iframe-saver-box{
+    top:0px;
+    right: 0px;
+    position:fixed;
+    z-index:999999;
+
+    height:100%;
+    width: 350px;
+    min-height:350px;
+    min-width:350px;
+}
+#ssac-iframe-saver-box iframe{
+    border:none !important;
+    vertical-align:top;
+    z-index:20;
+
+    height:100%;
+    width: 350px;
+    min-height:350px;
+    min-width:350px;
+}

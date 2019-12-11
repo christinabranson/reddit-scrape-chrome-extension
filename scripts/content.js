@@ -1,98 +1,48 @@
-window.addEventListener("mouseup", function(evt) {
-    //alert("mouseup");
-    var targ = evt.target;
+console.log("content.js");
 
-    // Set the page URL if not set
-    if (content["page_link"].length == 0) {
-        content["page_link"] = window.location.href;
-        updateFrontEndDisplay("page_link");
+var current_action = "";
+
+chrome.runtime.onMessage.addListener (function (request, sender, sendResponse) {
+    console.log("contentjs: From background.js: ");
+    console.log(request);
+
+    if (request.Message == "update-iframe-action-received") {
+        current_action = request.Action;
+
+        console.log("contentjs: saving current action as " + current_action);
     }
+
+    return true; // <-- Indicate that sendResponse will be async
+});
+
+// send the page url
+chrome.runtime.sendMessage({Message: "content-send-url", Selection: window.location.href}, function (response) {
+    ;
+})
+
+window.addEventListener("mouseup", function(evt) {
+    console.log("contentjs: mouseup");
 
     if (current_action.length > 0) {
         if (current_action == "title" || current_action == "author") {
             // get the selected text
             var selectedText = getSelectedText();
-            content[current_action] = selectedText;
         } else if (current_action == "content") {
             var selectedText = getHTMLOfSelection();
-            content[current_action] = selectedText;
         } else if (current_action == "link") {
             // get link from highlight
             var selectedText = getLinkFromSelection();
-            content[current_action] = selectedText;
+        } else {
+            var selectedText = "";
         }
 
-        updateFrontEndDisplay(current_action);
+        if(selectedText.length) {
+            chrome.runtime.sendMessage({Message: "content-update-selection", Selection: selectedText}, function (response) {
+                ;
+            })
+        }
     }
 });
-
-var content = {};
-content["page_link"] = "";
-content["title"] = "";
-content["content"] = "";
-content["content"] = "";
-content["link"] = "";
-
-// handle set title binding
-var setTitleElement = document.getElementById("settitle");
-setTitleElement.addEventListener(
-    "click",
-    function(e) {
-        setAction("title");
-    },
-    false
-);
-// handle set author binding
-var setAuthorElement = document.getElementById("setauthor");
-setAuthorElement.addEventListener(
-    "click",
-    function(e) {
-        setAction("author");
-    },
-    false
-);
-// handle set link binding
-var setLinkElement = document.getElementById("setlink");
-setLinkElement.addEventListener(
-    "click",
-    function(e) {
-        setAction("link");
-    },
-    false
-);
-// handling set content binding
-var setContentElement = document.getElementById("setcontent");
-setContentElement.addEventListener(
-    "click",
-    function(e) {
-        setAction("content");
-    },
-    false
-);
-
-var current_action = "link";
-var selected_text = "";
-
-function updateFrontEndDisplay(variable) {
-    console.log("updateFrontEndDisplay: " + variable);
-    if (content[variable] === undefined) {
-        return;
-    }
-
-    var element = document.getElementById(variable);
-    if (element !== undefined) {
-        element.value = content[variable];
-    }
-}
-
-function setAction(action) {
-    // Set the current action
-    console.log("Setting capture action to: " + action);
-    current_action = action;
-
-    var element = document.getElementById("current_action");
-    element.innerHTML = action;
-}
 
 function getSelectedText() {
     var txt = "";
@@ -131,6 +81,8 @@ function getLinkFromSelection() {
     if (window.getSelection) {
         var selection = window.getSelection();
         if (selection.rangeCount > 0) {
+            range = selection.getRangeAt(0);
+            var clonedSelection = range.cloneContents();
             var parentNode = selection.anchorNode.parentElement;
             var hasATags = false;
             var count = 0; // endess loop bad, k?
