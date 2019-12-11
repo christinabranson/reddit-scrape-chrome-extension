@@ -7,6 +7,23 @@ var contentFields = [
     "link",
 ];
 
+// add listeners for event/textarea
+var inputElements = document.getElementsByTagName("input");
+for (var i = 0, len = inputElements.length; i < len; i++) {
+    var inputElement = inputElements[i];
+    inputElement.onchange = function(e) {
+        sentUpdatedDataToServer();
+    };
+}
+var textareaElements = document.getElementsByTagName("textarea");
+for (i = 0, len = textareaElements.length; i < len; i++) {
+    var textareaElement = textareaElements[i];
+    textareaElement.onchange = function(e) {
+        sentUpdatedDataToServer();
+    };
+}
+
+
 // handle set title binding
 /*
 var setTitleElement = document.getElementById("settitle");
@@ -52,6 +69,7 @@ sendToServerElement.addEventListener(
     function(e) {
         // now send this to the background
         console.log("Now sending to the background.....");
+        sentUpdatedDataToServer();
         chrome.runtime.sendMessage({Message: "iframe-send-server"}, function (response) {
             ;
         })
@@ -72,13 +90,37 @@ clearContentsElement.addEventListener(
     false
 );
 
-function updateFrontEndForms(content) {
+function sentUpdatedDataToServer() {
+    // gather content
+    var serverData = {};
+    for (var contentFieldsI = 0; contentFieldsI < contentFields.length; contentFieldsI++) {
+        var attribute = contentFields[contentFieldsI];
+        serverData[attribute] = document.getElementById(attribute).value;
+    }
+    serverData["tags"] = document.getElementById("tags").value;
+    console.log(serverData);
 
+    chrome.runtime.sendMessage({Message: "iframe-update-content", ServerContent: serverData}, function (response) {
+        ;
+    })
+}
+
+function updateFrontEndForms(content) {
     for (var contentFieldsI = 0; contentFieldsI < contentFields.length; contentFieldsI++) {
         var attribute = contentFields[contentFieldsI];
         var element = document.getElementById(attribute);
         if (element !== undefined) {
             element.value = content[attribute];
+        }
+    }
+}
+
+function clearFrontEndForms(content) {
+    for (var contentFieldsI = 0; contentFieldsI < contentFields.length; contentFieldsI++) {
+        var attribute = contentFields[contentFieldsI];
+        var element = document.getElementById(attribute);
+        if (element !== undefined) {
+            element.value = "";
         }
     }
 }
@@ -122,6 +164,7 @@ function ensureAlertRed() {
 }
 
 function updateLatestSelection(latestSelection) {
+    return; //turned off currently
     var element = document.getElementById("last_selection");
     element.innerHTML = latestSelection;
 }
@@ -137,6 +180,20 @@ chrome.runtime.onMessage.addListener (function (request, sender, sendResponse) {
 
         updateFrontEndForms(content);
         updateLatestSelection(latestSelection);
+    }
+
+    else if (request.Message == 'background-sent-to-server') {
+        var responseText = request.ResponseText;
+        console.log(responseText);
+        if (responseText !== undefined) {
+            responseText = JSON.parse(responseText);
+            alert(responseText.message);
+        }
+        // now, reset
+        current_action = ""; // reset the current action
+        ensureAlertRed();
+        clearFrontEndForms();
+
     }
 });
 

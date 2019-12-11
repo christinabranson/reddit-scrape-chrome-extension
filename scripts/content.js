@@ -20,6 +20,36 @@ chrome.runtime.sendMessage({Message: "content-send-url", Selection: window.locat
     ;
 })
 
+/**
+ * Watch a
+ * @type {NodeList}
+ */
+/*
+var aElements = document.getElementsByTagName("a");
+for (var i = 0, len = aElements.length; i < len; i++) {
+    var aElement = aElements[i];
+    aElement.onclick = function(e) {
+        console.log("a click");
+        console.log(e);
+        if (current_action == "link") {
+            console.log("dont't follow the link but get the href");
+            // prevent following
+            e.preventDefault();
+            var linkElement = e.srcElement;
+            var link = getHrefFromNode(linkElement);
+
+            if(selectedText.length) {
+                chrome.runtime.sendMessage({Message: "content-update-selection", Selection: link}, function (response) {
+                    ;
+                })
+            }
+        } else {
+            // act normally
+        }
+    };
+}
+*/
+
 window.addEventListener("mouseup", function(evt) {
     console.log("contentjs: mouseup");
 
@@ -75,6 +105,11 @@ function getHTMLOfSelection() {
     return "";
 }
 
+/**
+ * Function to return a link embedded in the HTML of the highlighted text
+ * @returns {*}
+ * @deprecated Now using an event listener on a tag clicks, see
+ */
 function getLinkFromSelection() {
     console.log("getLinkFromSelection");
     var link = "";
@@ -84,30 +119,43 @@ function getLinkFromSelection() {
             range = selection.getRangeAt(0);
             var clonedSelection = range.cloneContents();
             var parentNode = selection.anchorNode.parentElement;
-            var hasATags = false;
-            var count = 0; // endess loop bad, k?
-            while (count < 5 && !hasATags) {
-                var div = document.createElement("div");
-                var clonedParentNode = parentNode.cloneNode(true);
-                console.log(clonedParentNode);
-                div.appendChild(clonedParentNode);
-                var aElements = div.querySelectorAll("a");
-                if (aElements.length > 0) {
-                    hasATags = true;
-                    var aElement = aElements[0];
-                    var href = aElement.getAttribute("href");
-                    div.removeChild(clonedParentNode);
-                    return href;
-                } else {
-                    console.log("No a tags found at count " + count + ". So moving up a parent...");
-                    div.removeChild(clonedParentNode);
-                    hasATags = false;
-                    parentNode = parentNode.parentElement; // now move on up
-                }
-                count++;
-            }
+            link = getHrefFromNode(parentNode);
         }
     }
 
     return link;
+}
+
+/**
+ *
+ *
+ * @param parentNode
+ * @returns {*}
+ */
+function getHrefFromNode(parentNode) {
+    maxLevels = 5;
+    var hasATags = false;
+    var count = 0; // endess loop bad, k?
+    while (count < maxLevels && !hasATags) {
+        var div = document.createElement("div");
+        var clonedParentNode = parentNode.cloneNode(true);
+        console.log(clonedParentNode);
+        div.appendChild(clonedParentNode);
+        var aElements = div.querySelectorAll("a");
+        if (aElements.length > 0) {
+            hasATags = true;
+            var aElement = aElements[0];
+            var href = aElement.getAttribute("href");
+            div.removeChild(clonedParentNode);
+            return href;
+        } else {
+            console.log("No a tags found at count " + count + ". So moving up a parent...");
+            div.removeChild(clonedParentNode);
+            hasATags = false;
+            parentNode = parentNode.parentElement; // now move on up
+        }
+        count++;
+    }
+
+    return "";
 }

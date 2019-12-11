@@ -1,6 +1,6 @@
 console.log("At least reached background.js");
 
-// find a better place to put these....
+// TODO: Find a better place to put these
 var api_username = "api_user";
 var api_password= "cPsSEfwfsHBJErv4AM8qhwptBmePkd78pQsKdGNXNWE5qyznHuUhxNEzaZM9VmxGASynkU3dXy8f";
 
@@ -12,6 +12,7 @@ var contentFields = [
     "author",
     "content",
     "link",
+    "tags",
 ];
 
 var content = {};
@@ -76,6 +77,13 @@ chrome.runtime.onMessage.addListener (
             return true; // <-- Indicate that sendResponse will be async
         }
 
+        else if (request.Message == "iframe-update-content") {
+            content = request.ServerContent;
+            console.log("Updated content");
+            console.log(content);
+            return true; // <-- Indicate that sendResponse will be async
+        }
+
         else if (request.Message == "iframe-send-server") {
             console.log("Now sending shit to the server....");
 
@@ -89,10 +97,22 @@ chrome.runtime.onMessage.addListener (
 
             // send the data
             var xhr = new XMLHttpRequest();
+            var responseText = "";
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == XMLHttpRequest.DONE) {
-                    alert(xhr.responseText);
+                    console.log(xhr.responseText);
+                    responseText = xhr.responseText;
+
+                    // Now send back to the iframe
+                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, {Message: 'background-sent-to-server', ResponseText: responseText}, function(response) {
+                            ;
+                        });
+                    });
+
+                    current_action = ""; // reset the current action
+                    clearContentFields(); // clear content fields
                 }
             }
 
@@ -103,17 +123,6 @@ chrome.runtime.onMessage.addListener (
             xhr.open('POST', url);
             xhr.send(dataJSON);
 
-            xhr.onload = function (data) {
-                console.log("xhr");
-                console.log(data);
-            };
-
-            // Now send back to the iframe
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, {Message: 'background-content-update', Content: content}, function(response) {
-                    ;
-                });
-            });
 
             return true; // <-- Indicate that sendResponse will be async
         }
