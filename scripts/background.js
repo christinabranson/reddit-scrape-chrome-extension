@@ -6,6 +6,8 @@ var api_password= "cPsSEfwfsHBJErv4AM8qhwptBmePkd78pQsKdGNXNWE5qyznHuUhxNEzaZM9V
 
 var chosen_action = "";
 
+var page_link = "";
+
 var contentFields = [
     "page_link",
     //"title",
@@ -21,7 +23,9 @@ clearContentFields();
 function clearContentFields() {
     for (var contentFieldsI = 0; contentFieldsI < contentFields.length; contentFieldsI++) {
         var attribute = contentFields[contentFieldsI];
-        content[attribute] = "";
+        if (attribute != "page_link") {
+            content[attribute] = "";
+        }
     }
 }
 
@@ -31,6 +35,7 @@ chrome.runtime.onMessage.addListener (
 
         if (request.Message == 'content-send-url') {
             content["page_link"] = request.Selection;
+            page_link = request.Selection;
 
             console.log(content);
 
