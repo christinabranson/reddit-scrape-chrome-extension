@@ -1,14 +1,14 @@
 {
-  "manifest_version":2,
+  "manifest_version": 2,
   "name":"Scrape Chrome Extension",
   "version":"0.1",
+  "description": "An extension that makes it easier to scrape content and send it to an external website",
+  "homepage_url": "https://christinab.dev",
   "permissions":[
     "tabs",
     "webRequest",
-    "http://devserver1.codersdev.com:8081/*",
-    "http://localhost/*"
-    //"http://*/*",
-    //"https://*/*"
+    "http://localhost/*",
+    "https://christinab.dev/*"
   ],
   "background": {
     "scripts": ["scripts/background.js"],
