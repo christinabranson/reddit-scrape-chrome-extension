@@ -1,6 +1,7 @@
 console.log("At least reached background.js");
 
 // TODO: Find a better place to put these
+var api_url = "https://christinab.dev/anthology/api/postStory";
 var api_username = "api_user";
 var api_password= "cPsSEfwfsHBJErv4AM8qhwptBmePkd78pQsKdGNXNWE5qyznHuUhxNEzaZM9VmxGASynkU3dXy8f";
 
@@ -121,11 +122,11 @@ chrome.runtime.onMessage.addListener (
                 }
             }
 
-            var url = "http://localhost/api/postStory";
             var dataJSON = JSON.stringify(dataForServer);
+            console.log(api_url);
             console.log(dataJSON);
 
-            xhr.open('POST', url);
+            xhr.open('POST', api_url);
             xhr.send(dataJSON);
 
 

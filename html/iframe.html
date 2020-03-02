@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Merriweather|Oswald&display=swap" rel="stylesheet">
     <style>
         body {
             background: #eee;
@@ -19,10 +20,77 @@
         label {
             margin-bottom: 0;
         }
+
+        .centered {
+            text-align: center;
+        }
+
+        h1 {
+
+            font-size: 2em;
+            font-family: sans-serif;
+            text-transform: uppercase;
+            line-height: 1.2em;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        h1 span.smaller {
+            font-size: 1em;
+        }
+
+        h1 span.larger {
+            font-size: 1.2em;
+            line-height: 1.1em;
+        }
+
+        h2 {
+            font-family: serif;
+            width: 100%;
+            font-size: 1.2em;
+            font-family: 'Merriweather', serif;
+        }
+
+        h2.withline {
+            overflow: hidden;
+            text-align: center;
+        }
+
+        h2.withline:before,
+        h2.withline:after {
+            background-color: #000;
+            content: "";
+            display: inline-block;
+            height: 1px;
+            position: relative;
+            vertical-align: middle;
+            width: 50%;
+        }
+
+        h2.withline:before {
+            right: 0.5em;
+            margin-left: -50%;
+        }
+
+        h2.withline:after {
+            left: 0.5em;
+            margin-right: -50%;
+        }
     </style>
 </head>
 <body>
 <div class="container-fluid">
+
+    <div class="centered">
+    <h1>
+        Scary
+        Stories
+        <br/>
+        <span class="smaller">About</span>
+        <br/>
+        <span class="larger">Camping</span>
+    </h1>
+    <h2 class="withline"><span>The Chrome Extension</span></h2>
+    </div>
 
     <p>This extension is used to help scrape scary content from Reddit. View the <a href="https://christinab.dev/anthology" target="_blank">anthology site</a> or
         check out <a href="https://github.com/christinabranson/reddit-scrape-chrome-extension" target="_blank">the Github repo</a> for more information.
